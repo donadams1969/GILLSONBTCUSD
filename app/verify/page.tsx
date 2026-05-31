@@ -2,7 +2,15 @@
 
 import { useState } from "react"
 import Link from "next/link"
-import { ArrowLeft, Shield, Search, CheckCircle2, XCircle, Loader2, Clock, ExternalLink, AlertTriangle } from "lucide-react"
+import { ArrowLeft, Shield, Search, CheckCircle2, XCircle, Loader2, Clock, ExternalLink, AlertTriangle, Hammer, Copy, Check } from "lucide-react"
+
+async function sha256Hex(message: string): Promise<string> {
+  const data = new TextEncoder().encode(message)
+  const digest = await crypto.subtle.digest("SHA-256", data)
+  return Array.from(new Uint8Array(digest))
+    .map((b) => b.toString(16).padStart(2, "0"))
+    .join("")
+}
 
 const EXPECTED_PAYLOAD = "6a20d55877c8e9d3d3d62325494f61f73b64c63f10ef97008c2a9693998782a2007e"
 
@@ -39,7 +47,32 @@ export default function VerifyPage() {
   const [result, setResult] = useState<VerifyResult | null>(null)
   const [err, setErr] = useState<string | null>(null)
 
+  // Anchor payload generator
+  const [anchorLabel, setAnchorLabel] = useState("FINAL_COATS_2026")
+  const [genPayload, setGenPayload] = useState("")
+  const [genHash, setGenHash] = useState("")
+  const [copied, setCopied] = useState(false)
+
   const valid = /^[0-9a-fA-F]{64}$/.test(txid.trim())
+
+  async function generatePayload() {
+    const hash = await sha256Hex(anchorLabel.trim() || "FINAL_COATS_2026")
+    // OP_RETURN (0x6a) + 32-byte push (0x20) + 32-byte SHA-256 digest
+    setGenHash(hash)
+    setGenPayload(`6a20${hash}`)
+    setCopied(false)
+  }
+
+  async function copyPayload() {
+    if (!genPayload) return
+    try {
+      await navigator.clipboard.writeText(genPayload)
+      setCopied(true)
+      setTimeout(() => setCopied(false), 2000)
+    } catch {
+      setCopied(false)
+    }
+  }
 
   async function runVerify() {
     if (!valid) return
@@ -106,6 +139,75 @@ export default function VerifyPage() {
           <p className="text-[9px] font-mono text-muted-foreground/60 mt-2">
             {"6a20 = OP_RETURN + 32-byte push // remainder = SGAU anchor hash"}
           </p>
+        </section>
+
+        {/* Anchor Payload Generator */}
+        <section className="border border-primary/30 bg-card p-4">
+          <div className="flex items-center gap-2 mb-3">
+            <Hammer className="w-4 h-4 text-primary" aria-hidden="true" />
+            <h2 className="text-[11px] font-mono font-bold uppercase tracking-widest text-foreground">
+              Anchor Payload Generator
+            </h2>
+          </div>
+          <p className="text-[10px] text-muted-foreground leading-relaxed mb-3">
+            The node holds no keys and cannot broadcast. Generate the exact OP_RETURN hex below, embed it in your own
+            signed Bitcoin transaction (Sparrow, bitcoin-cli, etc.), broadcast it, then paste the resulting real TXID
+            into the gate above to confirm <span className="text-foreground font-semibold">SEALED</span>.
+          </p>
+          <label htmlFor="anchor-label" className="text-[9px] font-mono uppercase tracking-widest text-muted-foreground">
+            Anchor Label
+          </label>
+          <div className="flex flex-col sm:flex-row gap-2 mt-1.5">
+            <input
+              id="anchor-label"
+              type="text"
+              value={anchorLabel}
+              onChange={(e) => setAnchorLabel(e.target.value)}
+              spellCheck={false}
+              autoComplete="off"
+              className="flex-1 bg-background border border-border px-3 py-2 text-xs font-mono text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            />
+            <button
+              onClick={generatePayload}
+              className="flex items-center justify-center gap-2 px-4 py-2 border border-primary/40 text-primary text-[10px] font-mono font-bold uppercase tracking-widest hover:bg-primary/10 transition-colors"
+            >
+              <Hammer className="w-3 h-3" aria-hidden="true" />
+              Generate
+            </button>
+          </div>
+
+          {genPayload && (
+            <div className="mt-4 flex flex-col gap-3">
+              <div>
+                <p className="text-[9px] font-mono uppercase tracking-widest text-muted-foreground mb-1">
+                  SHA-256 Anchor Hash (32 bytes)
+                </p>
+                <code className="text-[10px] font-mono text-foreground break-all leading-relaxed block">
+                  {genHash}
+                </code>
+              </div>
+              <div>
+                <div className="flex items-center justify-between mb-1">
+                  <p className="text-[9px] font-mono uppercase tracking-widest text-muted-foreground">
+                    OP_RETURN Script (embed this)
+                  </p>
+                  <button
+                    onClick={copyPayload}
+                    className="flex items-center gap-1 text-[9px] font-mono uppercase tracking-widest text-primary hover:text-primary/80 transition-colors"
+                  >
+                    {copied ? <Check className="w-3 h-3" aria-hidden="true" /> : <Copy className="w-3 h-3" aria-hidden="true" />}
+                    {copied ? "Copied" : "Copy"}
+                  </button>
+                </div>
+                <code className="text-[10px] font-mono text-primary break-all leading-relaxed block bg-background border border-border p-2">
+                  {genPayload}
+                </code>
+              </div>
+              <p className="text-[9px] font-mono text-muted-foreground/60 leading-relaxed">
+                {"This is a deterministic OP_RETURN script. The TXID does not exist until you broadcast — no fabricated hashes."}
+              </p>
+            </div>
+          )}
         </section>
 
         {/* Input */}
