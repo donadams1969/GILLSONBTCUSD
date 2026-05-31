@@ -87,6 +87,12 @@ export function Header() {
               Contracts
             </Link>
             <Link
+              href="/verify"
+              className="px-3 py-1.5 border border-border hover:border-primary/40 text-[10px] font-mono font-bold uppercase tracking-widest text-muted-foreground hover:text-foreground transition-colors"
+            >
+              Verify
+            </Link>
+            <Link
               href="/audit"
               className="px-3 py-1.5 border border-border hover:border-primary/40 text-[10px] font-mono font-bold uppercase tracking-widest text-muted-foreground hover:text-foreground transition-colors"
             >
