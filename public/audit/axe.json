@@ -1,0 +1,8 @@
+{
+  "placeholder": true,
+  "note": "Run scripts/generate-audit-artifacts.sh to populate with real axe-core output.",
+  "timestamp": "2026-02-16T00:00:00Z",
+  "violations": [],
+  "passes": [],
+  "incomplete": []
+}

@@ -1,0 +1,11 @@
+{
+  "placeholder": true,
+  "note": "Run scripts/generate-audit-artifacts.sh to populate with real Lighthouse output.",
+  "timestamp": "2026-02-16T00:00:00Z",
+  "categories": {
+    "performance": { "score": null },
+    "accessibility": { "score": null },
+    "best-practices": { "score": null },
+    "seo": { "score": null }
+  }
+}

@@ -1,0 +1,34 @@
+{
+  "name": "VALORAIPLUS Sovereign Anchor Agent",
+  "description": "Macro-economic oracle agent with hard gold/GDP peg enforcement. Sovereign index gating via Chainlink Functions, multi-token BLL architecture.",
+  "version": "0.1",
+  "protocol": "a2a",
+  "capabilities": [
+    "query_anchored_price",
+    "check_peg_status",
+    "compute_sovereign_valuation",
+    "trigger_gdp_update"
+  ],
+  "endpoint": "https://api.valorai.plus/a2a",
+  "authentication": {
+    "type": "bearer",
+    "description": "Bearer token required for write operations (trigger_gdp_update). Read operations are public."
+  },
+  "contracts": {
+    "sovereignIndex": "0x[DEPLOYED_ADDRESS]",
+    "valorTreasury": "0x[DEPLOYED_ADDRESS]",
+    "businessLogic": "0x[DEPLOYED_ADDRESS]"
+  },
+  "oracleFeeds": {
+    "goldXauUsd": "0x214eD9Da11D2fbe465a6fC601a91e62eBec1A0d6",
+    "btcUsd": "0xF4030086522a5bEEa4988F8cA5B36dbC97BeE88c",
+    "functionsRouter": "0x65Dcc24F8ff9e51F10DCc7Ed1e4e2A61e6E14bd6"
+  },
+  "operator": "0xA3F7...D91E [SHA-256 encrypted]",
+  "parentCid": "bafybeihdwdcefgh4dqkjv67uzcmw7ojee6xedzdetojuzjevtenxquvyku",
+  "toolkitMeta": {
+    "name": "ValorLoop_Audit_Toolkit_V2",
+    "sha256": "6778c1914a4861e00902aae73fe9245a6e6ed9fc732c66950d0da9e7de56b5c7",
+    "anchored": "2025-08-26T17:46:38.278419Z"
+  }
+}

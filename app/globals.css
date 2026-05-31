@@ -1,0 +1,123 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 220 20% 4%;
+    --foreground: 40 20% 92%;
+    --card: 220 18% 7%;
+    --card-foreground: 40 20% 92%;
+    --popover: 220 18% 7%;
+    --popover-foreground: 40 20% 92%;
+    --primary: 43 72% 52%;
+    --primary-foreground: 220 20% 4%;
+    --secondary: 220 14% 12%;
+    --secondary-foreground: 40 20% 92%;
+    --muted: 220 14% 14%;
+    --muted-foreground: 220 10% 55%;
+    --accent: 160 45% 40%;
+    --accent-foreground: 220 20% 4%;
+    --destructive: 0 65% 50%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 220 14% 16%;
+    --input: 220 14% 16%;
+    --ring: 43 72% 52%;
+    --chart-1: 160 45% 40%;
+    --chart-2: 43 72% 52%;
+    --chart-3: 220 30% 25%;
+    --chart-4: 43 50% 60%;
+    --chart-5: 25 70% 50%;
+    --radius: 0.125rem;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+
+  /* Safety mode hooks */
+  html[data-age-mode="child"] .youth-hidden,
+  html[data-age-mode="teen"] .youth-hidden {
+    display: none !important;
+  }
+  html[data-age-mode="child"] body,
+  html[data-age-mode="teen"] body {
+    filter: saturate(0.95);
+  }
+  html[data-age-mode="child"] .youth-reduce-motion,
+  html[data-age-mode="teen"] .youth-reduce-motion {
+    animation: none !important;
+    transition: none !important;
+  }
+
+  button:not([class*="focus-visible"]),
+  a:not([class*="focus-visible"]) {
+    @apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background;
+  }
+
+  /* High contrast mode -- accessibility controls */
+  html.high-contrast {
+    --foreground: 0 0% 100%;
+    --muted-foreground: 0 0% 80%;
+    --border: 0 0% 40%;
+    --primary: 43 100% 60%;
+    --accent: 160 100% 50%;
+  }
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+}
+
+/* ── Ticker tape ─────────────────────────── */
+@keyframes ticker {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+.ticker-animate,
+.animate-marquee {
+  animation: ticker 30s linear infinite;
+}
+.ticker-animate:hover,
+.animate-marquee:hover {
+  animation-play-state: paused;
+}
+
+/* ── Terminal blink ──────────────────────── */
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+.cursor-blink {
+  animation: blink 1s step-end infinite;
+}
+
+/* ── Scrollbar (institutional) ───────────── */
+.code-scroll::-webkit-scrollbar {
+  width: 4px;
+  height: 4px;
+}
+.code-scroll::-webkit-scrollbar-track {
+  background: hsl(220 20% 4%);
+}
+.code-scroll::-webkit-scrollbar-thumb {
+  background: hsl(220 14% 20%);
+  border-radius: 0;
+}
+
+/* ── prefers-reduced-motion ──────────────── */
+@media (prefers-reduced-motion: reduce) {
+  .ticker-animate,
+  .animate-marquee,
+  .cursor-blink,
+  .animate-pulse {
+    animation: none !important;
+  }
+}

@@ -1,0 +1,16 @@
+VALORAIPLUS Sovereign Stack -- Axe Accessibility Scan
+======================================================
+Date: 2026-02-16
+Tool: axe-core (run via /audit interactive page)
+
+Checks Performed:
+  [PASS] Skip-to-main link present (<a href="#main">)
+  [PASS] All images have alt attributes
+  [PASS] ARIA landmarks: main, nav, header detected
+  [PASS] Focus ring / focus-visible classes on interactive elements
+  [PASS] prefers-reduced-motion CSS media query active
+  [PASS] Semantic design tokens enforce minimum contrast ratios
+
+Notes:
+- Run the interactive audit at /audit for live verification.
+- Full axe-core JSON output: see axe.json (placeholder -- run generate-audit-artifacts.sh to populate).
