@@ -8,6 +8,7 @@ import { TerminalOutput } from '@/components/dashboard/terminal-output'
 import { NFTMinting } from '@/components/dashboard/nft-minting'
 import { TerminalCommandExecutor } from '@/components/dashboard/terminal-command-executor'
 import { AuditCompliance } from '@/components/dashboard/audit-compliance'
+import { AnchorVerification } from '@/components/dashboard/anchor-verification'
 import { Shield, Zap, Lock, Radio } from 'lucide-react'
 
 async function getDashboardData() {
@@ -135,6 +136,11 @@ export default async function DashboardPage() {
         {/* Audit & Compliance Section */}
         <section className="mb-8">
           <AuditCompliance manifests={manifests} />
+        </section>
+
+        {/* Bitcoin Anchor Verification Section */}
+        <section className="mb-8">
+          <AnchorVerification />
         </section>
 
         {/* Terminal Section */}
