@@ -122,6 +122,23 @@ export interface ConnectedWallet {
   created_at: string
 }
 
+export interface ProjectAsset {
+  id: string
+  symbol: string
+  name: string
+  role: string
+  protocol: string
+  node_id: string | null
+  merkle_root: string | null
+  integration_status: string
+  system_state: string | null
+  balance: number
+  price_usd: number
+  is_active: boolean
+  last_updated: string
+  created_at: string
+}
+
 // Dashboard Stats
 export interface DashboardStats {
   totalTokens: number

@@ -13,6 +13,7 @@ import { ForensicRepository } from '@/components/dashboard/forensic-repository'
 import { DefensibleValuation } from '@/components/dashboard/defensible-valuation'
 import { IntegrityVerifier } from '@/components/dashboard/integrity-verifier'
 import { ConnectedWallets } from '@/components/dashboard/connected-wallets'
+import { ProjectAssets } from '@/components/dashboard/project-assets'
 import { Shield, Zap, Lock, Radio } from 'lucide-react'
 
 // Always render with live database values (no static caching of stale data)
@@ -140,6 +141,11 @@ export default async function DashboardPage() {
             <FederalAgencies agencies={agencies} />
           </div>
         </div>
+
+        {/* Project Assets Section */}
+        <section className="mb-8">
+          <ProjectAssets />
+        </section>
 
         {/* Connected Wallets Section */}
         <section className="mb-8">
