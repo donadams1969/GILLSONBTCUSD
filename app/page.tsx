@@ -11,6 +11,10 @@ import { AuditCompliance } from '@/components/dashboard/audit-compliance'
 import { AnchorVerification } from '@/components/dashboard/anchor-verification'
 import { Shield, Zap, Lock, Radio } from 'lucide-react'
 
+// Always render with live database values (no static caching of stale data)
+export const dynamic = 'force-dynamic'
+export const revalidate = 0
+
 async function getDashboardData() {
   const supabase = await createClient()
   
