@@ -44,9 +44,22 @@ interface SealData {
   disclaimer?: string
 }
 
+interface IntelData {
+  ledger_state: string
+  bundle_hash: string
+  snapshot_hash: string | null
+  canonical_hash: string | null
+  total_supply_cap: number
+  hash_verified: boolean
+  status: string
+  note: string
+  last_sync: string | null
+}
+
 export function BankingPortal() {
   const { data } = useSWR<PortalData>('/api/portal', fetcher)
   const { data: seal } = useSWR<SealData>('/api/tokens/sync', fetcher)
+  const { data: intel } = useSWR<IntelData>('/api/portal/intelligence', fetcher)
 
   const metrics = data?.metrics ?? []
   const tokens = data?.tokens ?? []
@@ -148,6 +161,33 @@ export function BankingPortal() {
               </p>
             )}
           </div>
+
+          {/* Forensic anchor (Omni-Kodex) */}
+          {intel && (
+            <div className="mt-4 rounded-lg border border-zinc-700/60 bg-zinc-950/80 p-3">
+              <div className="flex items-center justify-between font-mono text-xs text-zinc-300">
+                <span className="flex items-center gap-2">
+                  <ShieldCheck className="h-3.5 w-3.5 text-cyan-400" />
+                  VALORAIPLUS FORENSIC ANCHOR
+                </span>
+                <span className="text-zinc-500">
+                  ledger {intel.ledger_state} · cap{' '}
+                  {Number(intel.total_supply_cap).toLocaleString()}
+                </span>
+              </div>
+              <div className="mt-2 space-y-1.5">
+                <AnchorRow label="bundle_hash" value={intel.bundle_hash} />
+                <AnchorRow label="snapshot_hash" value={intel.snapshot_hash} />
+                <AnchorRow
+                  label="canonical_hash"
+                  value={intel.canonical_hash ?? 'NOT_INJECTED'}
+                />
+              </div>
+              <p className="mt-2 font-mono text-[10px] italic leading-relaxed text-zinc-600">
+                {intel.note}
+              </p>
+            </div>
+          )}
         </CardContent>
       </Card>
 
@@ -310,6 +350,21 @@ export function BankingPortal() {
           </div>
         </CardContent>
       </Card>
+    </div>
+  )
+}
+
+function AnchorRow({
+  label,
+  value,
+}: {
+  label: string
+  value: string | null
+}) {
+  return (
+    <div className="break-all font-mono text-[10px] text-zinc-400">
+      <span className="text-zinc-500">{label}: </span>
+      {value ?? '—'}
     </div>
   )
 }
