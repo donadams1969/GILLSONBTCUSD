@@ -109,6 +109,19 @@ export interface FederalLedger {
   created_at: string
 }
 
+export interface ConnectedWallet {
+  id: string
+  provider: string
+  chain: string
+  wallet_address: string
+  native_symbol: string
+  native_balance: number
+  balance_usd: number
+  is_connected: boolean
+  last_updated: string
+  created_at: string
+}
+
 // Dashboard Stats
 export interface DashboardStats {
   totalTokens: number
