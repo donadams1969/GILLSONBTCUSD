@@ -9,6 +9,7 @@ import { NFTMinting } from '@/components/dashboard/nft-minting'
 import { TerminalCommandExecutor } from '@/components/dashboard/terminal-command-executor'
 import { AuditCompliance } from '@/components/dashboard/audit-compliance'
 import { AnchorVerification } from '@/components/dashboard/anchor-verification'
+import { ForensicRepository } from '@/components/dashboard/forensic-repository'
 import { Shield, Zap, Lock, Radio } from 'lucide-react'
 
 // Always render with live database values (no static caching of stale data)
@@ -145,6 +146,11 @@ export default async function DashboardPage() {
         {/* Bitcoin Anchor Verification Section */}
         <section className="mb-8">
           <AnchorVerification />
+        </section>
+
+        {/* Forensic Repository Index Section */}
+        <section className="mb-8">
+          <ForensicRepository />
         </section>
 
         {/* Terminal Section */}
