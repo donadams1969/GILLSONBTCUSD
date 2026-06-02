@@ -1,7 +1,9 @@
 'use client'
 
+import { useMemo, useState } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
+import { Input } from '@/components/ui/input'
 import {
   FolderLock,
   FileText,
@@ -12,6 +14,7 @@ import {
   CircleDashed,
   ShieldAlert,
   CheckCircle2,
+  Search,
 } from 'lucide-react'
 
 type ActionableStatus =
@@ -28,6 +31,7 @@ interface ManifestElement {
   sha256: string
   actionableStatus: ActionableStatus
   targetReviewer: string
+  notes?: string
 }
 
 // Verbatim repository index — Doc 000-RO-A11-R1 / 000-A0-R17-R1.
@@ -40,6 +44,7 @@ const MASTER_MANIFEST: ManifestElement[] = [
     sha256: 'NATIVE_BYTES_ON_FILE',
     actionableStatus: 'For Judicial Notice',
     targetReviewer: 'Department 12 Chambers / Judge Michelle Tong',
+    notes: 'Lead repository document, master statement, and narrative lead.',
   },
   {
     sequence: '00_MANIFEST',
@@ -48,6 +53,7 @@ const MASTER_MANIFEST: ManifestElement[] = [
     sha256: 'PLAINTEXT_MANIFEST_VERIFIED',
     actionableStatus: 'Verified / Immutable',
     targetReviewer: 'Court IT E-Filing Operations Desk',
+    notes: 'Full untruncated plaintext cryptographic manifest mapping.',
   },
   {
     sequence: '01',
@@ -56,6 +62,7 @@ const MASTER_MANIFEST: ManifestElement[] = [
     sha256: 'dca8413eb7ed56cdd3b30b6ddf2b435ed6025724975614cd8bc4f8e714ba0b33',
     actionableStatus: 'For Judicial Notice',
     targetReviewer: 'Department 12 Chambers',
+    notes: 'Conformed tracking build matching requirements.',
   },
   {
     sequence: '02',
@@ -64,6 +71,7 @@ const MASTER_MANIFEST: ManifestElement[] = [
     sha256: 'd8f63463534231ad018443689ad35c759c1ae76c13e296cab3b209c0bf3140b8',
     actionableStatus: 'For Judicial Notice',
     targetReviewer: 'Department 12 Chambers',
+    notes: 'Notice of public funds conservation mapping protocols.',
   },
   {
     sequence: '05',
@@ -72,6 +80,7 @@ const MASTER_MANIFEST: ManifestElement[] = [
     sha256: '0fb0809bc4040faac0a24a4115f23942e406c8a46f0e54135094af8525e4ef9d',
     actionableStatus: 'For Judicial Notice',
     targetReviewer: 'Department 12 Chambers',
+    notes: 'Ecosystem infrastructure tracking framework declaration.',
   },
   {
     sequence: '06',
@@ -80,6 +89,7 @@ const MASTER_MANIFEST: ManifestElement[] = [
     sha256: '22501e91b95187836ecb27dbd34f5ea5a3e66db40250d6a6ec10f894bc02a5b1',
     actionableStatus: 'For Judicial Notice',
     targetReviewer: 'Department 12 Chambers',
+    notes: 'All-in-one data matching for service animal status metrics.',
   },
   {
     sequence: 'SFHA',
@@ -87,6 +97,7 @@ const MASTER_MANIFEST: ManifestElement[] = [
     sha256: 'c49a3ac89b00d6c9cad5728217d0c3d8ffd6deaa5fb596d7d4061bac675fa7d0',
     actionableStatus: 'Active / Pending Review',
     targetReviewer: 'Superior Court ADA Coordinator Line',
+    notes: '29 pages: housing reexamination, E-SIGN consents, accommodations.',
   },
   {
     sequence: 'FORENSIC',
@@ -94,6 +105,7 @@ const MASTER_MANIFEST: ManifestElement[] = [
     sha256: 'VERIFIED_NATIVE_BYTES_IN_EMBEDDED_LOCKER',
     actionableStatus: 'For In Camera Review',
     targetReviewer: 'Special Forensic Master Review Queue',
+    notes: 'Compressed folder holding core tracking logs and metadata.',
   },
   {
     sequence: 'ANCHOR_CHECK',
@@ -101,6 +113,8 @@ const MASTER_MANIFEST: ManifestElement[] = [
     sha256: '26856b24c50750f0c69c1eeb86a69ef710551555c2c220e34d57521cbc8d75c2',
     actionableStatus: 'STOP_TX_NOT_FOUND',
     targetReviewer: 'Court IT / Independent System Audit Desk',
+    notes:
+      'CRITICAL ACCOUNTING ALERT: Unanchored placeholder. TXID returns 404 across independent node explorers.',
   },
 ]
 
@@ -157,10 +171,24 @@ function isHexSha(value: string) {
 }
 
 export function ForensicRepository() {
+  const [searchTerm, setSearchTerm] = useState('')
+
   const judicialCount = MASTER_MANIFEST.filter(
     (m) => m.actionableStatus === 'For Judicial Notice'
   ).length
   const anchorRow = MASTER_MANIFEST.find((m) => m.actionableStatus === 'STOP_TX_NOT_FOUND')
+
+  const filteredManifest = useMemo(() => {
+    const q = searchTerm.trim().toLowerCase()
+    if (!q) return MASTER_MANIFEST
+    return MASTER_MANIFEST.filter(
+      (m) =>
+        m.fileName.toLowerCase().includes(q) ||
+        m.sha256.toLowerCase().includes(q) ||
+        m.targetReviewer.toLowerCase().includes(q) ||
+        m.sequence.toLowerCase().includes(q)
+    )
+  }, [searchTerm])
 
   return (
     <Card className="border-cyan-500/30 bg-black/60 backdrop-blur-sm">
@@ -181,9 +209,29 @@ export function ForensicRepository() {
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4 p-4">
-        {/* Case reference */}
-        <div className="rounded-lg border border-cyan-500/20 bg-cyan-500/5 p-3 font-mono text-xs text-zinc-400">
-          CASE CCH-28-589086 / CUD-26-682107 · Doc 000-RO-A11-R1 / 000-A0-R17-R1
+        {/* Case reference + node authority banner */}
+        <div className="space-y-2 rounded-lg border border-cyan-500/20 bg-cyan-500/5 p-3 font-mono text-xs text-zinc-400">
+          <div>CASE CCH-28-589086 / CUD-26-682107 · Doc 000-RO-A11-R1 / 000-A0-R17-R1</div>
+          <div className="grid gap-1 border-t border-cyan-500/10 pt-2 text-[11px] text-zinc-500">
+            <div>
+              <span className="text-zinc-600">NODE AUTHORITY:</span> POPPA-SGAU-7226.3461.DG77.77X · Saint
+              Paul 14D Node Core
+            </div>
+            <div>
+              <span className="text-zinc-600">STATUS MAP:</span> KODEX-LOCKED · TRUTHFUL AUDIT LAYERS ACTIVE
+            </div>
+          </div>
+        </div>
+
+        {/* Search filter */}
+        <div className="relative">
+          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-500" />
+          <Input
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            placeholder="Filter by file name, checksum, reviewer, or sequence..."
+            className="border-cyan-500/30 bg-black/40 pl-9 font-mono text-xs text-cyan-300 placeholder:text-zinc-600"
+          />
         </div>
 
         {/* Honest anchor banner */}
@@ -205,7 +253,12 @@ export function ForensicRepository() {
 
         {/* Manifest rows */}
         <div className="grid gap-2">
-          {MASTER_MANIFEST.map((m) => {
+          {filteredManifest.length === 0 && (
+            <div className="rounded-lg border border-zinc-700/40 bg-zinc-900/40 p-4 text-center font-mono text-xs text-zinc-500">
+              No records match &quot;{searchTerm}&quot;.
+            </div>
+          )}
+          {filteredManifest.map((m) => {
             const cfg = statusConfig[m.actionableStatus]
             const Icon = cfg.icon
             const hashIsHex = isHexSha(m.sha256)
@@ -250,6 +303,18 @@ export function ForensicRepository() {
                   <div className="mt-2 text-[11px] text-zinc-500">
                     <span className="text-zinc-600">Reviewer:</span> {m.targetReviewer}
                   </div>
+
+                  {m.notes && (
+                    <div
+                      className={`mt-2 border-t pt-2 text-[11px] italic ${
+                        m.actionableStatus === 'STOP_TX_NOT_FOUND'
+                          ? 'border-red-500/30 text-red-300/90'
+                          : 'border-zinc-700/40 text-zinc-500'
+                      }`}
+                    >
+                      {m.notes}
+                    </div>
+                  )}
                 </div>
 
                 <div className="sm:w-52 sm:shrink-0">
