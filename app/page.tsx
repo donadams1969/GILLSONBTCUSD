@@ -14,6 +14,7 @@ import { DefensibleValuation } from '@/components/dashboard/defensible-valuation
 import { IntegrityVerifier } from '@/components/dashboard/integrity-verifier'
 import { ConnectedWallets } from '@/components/dashboard/connected-wallets'
 import { ProjectAssets } from '@/components/dashboard/project-assets'
+import { BankingPortal } from '@/components/dashboard/banking-portal'
 import { Shield, Zap, Lock, Radio } from 'lucide-react'
 
 // Always render with live database values (no static caching of stale data)
@@ -125,6 +126,11 @@ export default async function DashboardPage() {
         {/* Stats Overview */}
         <section className="mb-8">
           <StatsCards stats={stats} />
+        </section>
+
+        {/* VALOR AI+ Banking Portal Intelligence */}
+        <section className="mb-8">
+          <BankingPortal />
         </section>
 
         {/* Main Grid */}

@@ -139,6 +139,57 @@ export interface ProjectAsset {
   created_at: string
 }
 
+export interface PortalMetric {
+  id: string
+  key: string
+  label: string
+  value: string
+  unit: string | null
+  status: string
+  sort_order: number
+  updated_at: string
+}
+
+export interface PortalToken {
+  id: string
+  symbol: string
+  category: 'PRIMARY' | 'SECONDARY'
+  market_cap_b: number
+  sort_order: number
+  created_at: string
+}
+
+export interface PortalCompliance {
+  id: string
+  agency: string
+  framework: string
+  status: string
+  expiration: string | null
+  sort_order: number
+}
+
+export interface BaseActivity {
+  id: string
+  wallet_address: string
+  direction: 'INBOUND' | 'OUTBOUND'
+  anchor_type: string
+  evidence_anchor: string
+  label: string | null
+  explorer_url: string | null
+  observed_at: string
+}
+
+export interface TokenSync {
+  id: string
+  registry_label: string
+  canonical_hash: string | null
+  observed_hash: string | null
+  hash_verified: boolean
+  total_supply_cap: number
+  last_sync: string | null
+  created_at: string
+}
+
 // Dashboard Stats
 export interface DashboardStats {
   totalTokens: number
