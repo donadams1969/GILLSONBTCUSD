@@ -13,6 +13,13 @@ const FSX_MAP: Record<number, string> = {
   36:'77260036', 37:'77260037', 38:'77260038', 39:'77260039', 40:'77260040',
   41:'77260041', 42:'77260042', 43:'77260043',
   44:'77260044', 45:'77260045', 46:'77260046',
+  // Stack I — Forensic Dossier / Fee Waiver / Constructive Eviction (May 19, 2026)
+  56:'77260056', 57:'77260057', 59:'77260059', 66:'77260066',
+  // Stack J — ADA / MC-410 / Motion to Compel (May 21–22, 2026)
+  89:'77260089', 92:'77260092', 94:'77260094',
+  // Stack K — Rule 1.100 / ADA / Dept 12 / HUD Notices (May 26, 2026)
+  116:'77260116', 1161:'77260116', 1162:'77260116',
+  117:'77260117', 120:'77260120', 121:'77260121',
 }
 
 // SF Superior Court FSX approved document type codes — aligned to SFSC registry
@@ -35,6 +42,13 @@ const DOC_TYPE_MAP: Record<number, string> = {
   36:'DEC',  37:'XCOMP',38:'NOT', 39:'IDX',   40:'MOT',
   41:'DEC',  42:'MOT',  43:'NOT',
   44:'POS',  45:'NOT',  46:'IDX',
+  // Stack I
+  56:'STMT', 57:'FW-001', 59:'NOT', 66:'STMT',
+  // Stack J
+  89:'MOT',  92:'MC-410', 94:'NOT',
+  // Stack K
+  116:'MOT', 1161:'APX', 1162:'POS',
+  117:'NOT', 120:'NOT',  121:'NOT',
 }
 
 const DOCS: Record<number, { name: string; pdfName: string; type: string }> = {
@@ -84,6 +98,22 @@ const DOCS: Record<number, { name: string; pdfName: string; type: string }> = {
   44: { name: "Proof of Electronic Service — v5.0 Master Manifest Update",        pdfName: "valoraiplus_cud26_682107_doc44_pos_master_manifest.pdf",                                        type: "Proof of Electronic Service" },
   45: { name: "Notice of Filing Lodging — Master Evidence Locker",                pdfName: "valoraiplus_cud26_682107_doc45_notice_filing_lodging.pdf",                                      type: "Notice (Other)" },
   46: { name: "Master Bundle Index v5.5 KODEX",                                   pdfName: "valoraiplus_cud26_682107_doc46_master_bundle_v55.pdf",                                          type: "Index (Other)" },
+  // ── Stack I — Forensic Dossier / Fee Waiver / Constructive Eviction (Filed May 19, 2026) ──
+  56:  { name: "Consolidated Forensic Dossier: Omnibus Statement of Evidentiary Facts (REVISED)",            pdfName: "CUD-26-682107_Doc056_Consolidated_Forensic_Dossier_v4.pdf",                type: "Omnibus Statement / Evidentiary Record" },
+  57:  { name: "Application for Waiver of Court Fees and Costs (FW-001 Format) — R2",                         pdfName: "CUD-26-682107_Doc057A_FeeWaiver_FW001_R2.pdf",                             type: "Fee Waiver Application" },
+  59:  { name: "Notice of Lodging and Transmittal — Docs 56, 57 & 58; Mimecast Barrier Statement",           pdfName: "CUD-26-682107_Doc059_Notice_Lodging_Transmittal.pdf",                      type: "Notice (Other)" },
+  66:  { name: "Statement of Constructive Eviction: Two-Period Chronological Evidentiary Record",            pdfName: "CUD-26-682107_Doc066_Constructive_Eviction_Chronological_Record_R2.pdf",   type: "Statement / Evidentiary Record" },
+  // ── Stack J — ADA / MC-410 / Motion to Compel (Filed May 21–22, 2026) ──
+  89:  { name: "Amended Notice of Unauthorized Representation; Motion to Compel Financial Disclosure (Retainer, Insurance, Bonding) — R2", pdfName: "CUD-26-682107_Doc089_R2_Amended_Motion_Compel_Financial_Disclosure.pdf", type: "Amended Motion" },
+  92:  { name: "Electronic Request for Reasonable Accommodation (MC-410); Attachment to Answer (UD-105) — Affirmative Defenses",           pdfName: "CUD-26-682107_Doc092_Electronic_MC410_RA_AffirmativeDefenses_UD105.pdf",  type: "MC-410 / Answer Attachment" },
+  94:  { name: "Final Notice of Combined Electronic Submission; Expanded Distribution MC-410 / ADA E-Filing — R1",                          pdfName: "CUD-26-682107_Doc094_R1_Final_Notice_Expanded_Distribution_MC410.pdf",    type: "Notice (Other)" },
+  // ── Stack K — Rule 1.100 / ADA / Dept 12 / HUD Notices (Filed May 26, 2026) ──
+  116:  { name: "Motion for Reasonable Accommodation Regarding Filing Procedures; Electronic-Filing Accommodation; Non-Default Protection", pdfName: "CUD-26-682107_Doc116_Motion_RA_FilingProcedures.pdf",                     type: "Motion / Rule 1.100 Request" },
+  1161: { name: "Technical Appendix to Doc 116-R1 — VALORAIPLUS Evidence Module Inventory (116A-R1)",                                       pdfName: "CUD-26-682107_Doc116A_R1_Technical_Appendix_VALORAIPLUS_EvidenceModules.pdf", type: "Technical Appendix" },
+  1162: { name: "Proof of Service and Technical Transmission Certificate for Doc 116-R1 (116B-R1)",                                         pdfName: "CUD-26-682107_Doc116B_R1_ProofOfService_TechnicalTransmissionCert.pdf",   type: "Proof of Service / Certificate" },
+  117:  { name: "Lead Notice: VTU Secretary Communications; ADA Coordinator Transmission; Dept 12 Notice; Related Protective Case CCH-28-589086", pdfName: "CUD-26-682107_Doc117_VTU_Secretary_Lead_Notice_ADA_Dept12.pdf",      type: "Lead Notice" },
+  120:  { name: "Notice of Dependent Adult Abuse Concerns; Mandated-Reporter Review; ADA/FEHA Non-Compliance; Request for Immediate Access Protection", pdfName: "CUD-26-682107_Doc120_DepAdult_MandatedReporter_ADA_FEHA_Notice.pdf", type: "Notice (Other)" },
+  121:  { name: "Urgent Notice: HUD Regulatory Compliance; Mandated-Reporter Review; ADA/FEHA Meaningful Access; Request for Procedural Estoppel / Pause", pdfName: "CUD-26-682107_Doc121_HUD_MandatedReporter_ADA_Estoppel.pdf",       type: "Notice (Other)" },
 }
 
 async function buildPDF(docId: number): Promise<Uint8Array> {
@@ -278,7 +308,7 @@ export async function GET(req: NextRequest) {
 
   if (!id || !DOCS[id]) {
     return NextResponse.json(
-      { error: `Document ID ${id} not found. Valid range: 1-46.` },
+      { error: `Document ID ${id} not found. Valid IDs: ${Object.keys(DOCS).join(', ')}.` },
       { status: 404 }
     )
   }
