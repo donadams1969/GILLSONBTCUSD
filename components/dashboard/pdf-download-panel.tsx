@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { Download, FileText, CheckCircle, Loader2, Printer } from 'lucide-react'
+import { Download, FileText, CheckCircle, Loader2, Printer, ShieldCheck } from 'lucide-react'
 
 interface DocMeta {
   id: number
@@ -112,10 +112,52 @@ async function downloadDoc(id: number, pdfName: string) {
   URL.revokeObjectURL(url)
 }
 
+function downloadText(filename: string, text: string, mime = 'text/plain') {
+  const blob = new Blob([text], { type: mime })
+  const url  = URL.createObjectURL(blob)
+  const a    = document.createElement('a')
+  a.href     = url
+  a.download = filename
+  a.click()
+  URL.revokeObjectURL(url)
+}
+
 export function PDFDownloadPanel() {
   const [downloading, setDownloading] = useState<Set<number>>(new Set())
   const [done, setDone]               = useState<Set<number>>(new Set())
   const [allBusy, setAllBusy]         = useState(false)
+  const [provBusy, setProvBusy]       = useState(false)
+  const [masterRoot, setMasterRoot]   = useState<string | null>(null)
+  const [provCount, setProvCount]     = useState(0)
+
+  const handleProvenance = async () => {
+    setProvBusy(true)
+    try {
+      // Hash every document in the registry and build the Master Root.
+      const exhibits = DOCS.map(d => d.id)
+      const res = await fetch('/api/court/provenance', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ exhibits }),
+      })
+      if (!res.ok) throw new Error(await res.text())
+      const data = await res.json()
+      setMasterRoot(data.master_root_hash)
+      setProvCount(data.exhibit_count)
+      const stamp = new Date().toISOString().slice(0, 10)
+      downloadText(`CUD-26-682107_Forensic_Provenance_Declaration_${stamp}.txt`, data.declaration_text)
+      downloadText(`CUD-26-682107_evidence_manifest_${stamp}.txt`, data.manifest_text)
+      downloadText(
+        `CUD-26-682107_hash_register_${stamp}.json`,
+        JSON.stringify({ master_root_hash: data.master_root_hash, manifest: data.manifest, register: data.register }, null, 2),
+        'application/json',
+      )
+    } catch (e) {
+      console.error('[v0] provenance generation failed:', e)
+    } finally {
+      setProvBusy(false)
+    }
+  }
 
   const handleSingle = async (doc: DocMeta) => {
     setDownloading(prev => new Set(prev).add(doc.id))
@@ -153,15 +195,42 @@ export function PDFDownloadPanel() {
             Case CUD-26-682107 &bull; Dept 12 &bull; Judge Michelle Tong &bull; {TOTAL} Documents &bull; SFefiling@sftc.org
           </p>
         </div>
-        <button
-          onClick={handleAll}
-          disabled={allBusy}
-          className="flex items-center gap-2 px-5 py-2.5 rounded-lg bg-amber-500 hover:bg-amber-400 disabled:opacity-50 text-black font-mono font-bold text-sm transition"
-        >
-          {allBusy ? <Loader2 className="h-4 w-4 animate-spin" /> : <Download className="h-4 w-4" />}
-          {allBusy ? `Generating All ${TOTAL}...` : `Download All ${TOTAL} PDFs`}
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={handleProvenance}
+            disabled={provBusy}
+            className="flex items-center gap-2 px-5 py-2.5 rounded-lg bg-emerald-500 hover:bg-emerald-400 disabled:opacity-50 text-black font-mono font-bold text-sm transition"
+          >
+            {provBusy ? <Loader2 className="h-4 w-4 animate-spin" /> : <ShieldCheck className="h-4 w-4" />}
+            {provBusy ? 'Hashing & Sealing...' : 'Provenance Declaration'}
+          </button>
+          <button
+            onClick={handleAll}
+            disabled={allBusy}
+            className="flex items-center gap-2 px-5 py-2.5 rounded-lg bg-amber-500 hover:bg-amber-400 disabled:opacity-50 text-black font-mono font-bold text-sm transition"
+          >
+            {allBusy ? <Loader2 className="h-4 w-4 animate-spin" /> : <Download className="h-4 w-4" />}
+            {allBusy ? `Generating All ${TOTAL}...` : `Download All ${TOTAL} PDFs`}
+          </button>
+        </div>
       </div>
+
+      {masterRoot && (
+        <div className="rounded-lg border border-emerald-500/40 bg-emerald-950/30 px-4 py-3 font-mono text-xs space-y-1">
+          <div className="flex items-center gap-2 text-emerald-400 font-bold">
+            <ShieldCheck className="h-4 w-4" />
+            FORENSIC PROVENANCE SEALED — {provCount} EXHIBITS HASHED (SHA-256)
+          </div>
+          <div className="text-emerald-300">
+            Master Root Hash:&nbsp;
+            <span className="text-emerald-200 break-all select-all">{masterRoot}</span>
+          </div>
+          <div className="text-emerald-300/70">
+            Declaration, sha256sum manifest, and JSON hash register downloaded. Re-verify any exhibit with
+            &nbsp;<span className="text-emerald-200">sha256sum &lt;filename&gt;</span>.
+          </div>
+        </div>
+      )}
 
       <div className="rounded-lg border border-amber-500/30 bg-amber-500/5 px-4 py-3 font-mono text-xs text-amber-300 space-y-0.5">
         <div className="font-bold text-amber-400">FSX COMPLIANCE ACTIVE — REAL FILED DOCS REGISTRY</div>

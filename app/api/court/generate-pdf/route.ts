@@ -1,8 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { PDFDocument, StandardFonts, rgb, PageSizes } from 'pdf-lib'
+import crypto from 'crypto'
+
+// Canonical, fixed provenance epoch. Using a constant (instead of new Date())
+// makes every generated PDF byte-for-byte deterministic, so its SHA-256 is
+// stable and independently re-verifiable by the Court. Do not change this value
+// without re-issuing the Forensic Provenance Declaration / Hash Register.
+const CANONICAL_FILING_DATE = new Date('2026-05-26T00:00:00.000Z')
+const CANONICAL_DATE_LABEL = 'May 26, 2026'
 
 // FSX transaction number map — 8-digit, prefix 77
-const FSX_MAP: Record<number, string> = {
+export const FSX_MAP: Record<number, string> = {
   1:'77260001', 2:'77260002', 3:'77260003', 4:'77260004', 5:'77260005',
   6:'77260006', 7:'77260007', 8:'77260008', 9:'77260009', 10:'77260010',
   11:'77260011', 12:'77260012', 13:'77260013', 14:'77260014', 15:'77260015',
@@ -31,7 +39,7 @@ const FSX_MAP: Record<number, string> = {
 // Stack F: Motion to Quash
 // Stack G: Agency Complaints & Cross-Complaint
 // Stack H: Final Operative Motions
-const DOC_TYPE_MAP: Record<number, string> = {
+export const DOC_TYPE_MAP: Record<number, string> = {
   1:'ANS',   2:'VER',   3:'POS',  4:'CM-010', 5:'NOT',
   6:'MOT',   7:'DEC',   8:'ORD',  9:'NOT',    10:'MPA',
   11:'DEM',  12:'NOT',  13:'MPA', 14:'DEC',   15:'ORD',
@@ -51,7 +59,7 @@ const DOC_TYPE_MAP: Record<number, string> = {
   117:'NOT', 120:'NOT',  121:'NOT',
 }
 
-const DOCS: Record<number, { name: string; pdfName: string; type: string }> = {
+export const DOCS: Record<number, { name: string; pdfName: string; type: string }> = {
   1:  { name: "UD-105 Answer + Affirmative Defenses",                             pdfName: "valoraiplus_cud26_682107_doc01_answer.pdf",                                                      type: "Answer" },
   2:  { name: "Defendant's Verification of Answer",                               pdfName: "valoraiplus_cud26_682107_doc02_verification.pdf",                                                type: "Verification" },
   3:  { name: "Proof of Electronic Service — Answer",                             pdfName: "valoraiplus_cud26_682107_doc03_pos_answer.pdf",                                                  type: "Proof of Electronic Service" },
@@ -116,7 +124,7 @@ const DOCS: Record<number, { name: string; pdfName: string; type: string }> = {
   121:  { name: "Urgent Notice: HUD Regulatory Compliance; Mandated-Reporter Review; ADA/FEHA Meaningful Access; Request for Procedural Estoppel / Pause", pdfName: "CUD-26-682107_Doc121_HUD_MandatedReporter_ADA_Estoppel.pdf",       type: "Notice (Other)" },
 }
 
-async function buildPDF(docId: number): Promise<Uint8Array> {
+export async function buildPDF(docId: number): Promise<Uint8Array> {
   const doc    = DOCS[docId]
   const fsx    = FSX_MAP[docId]
   const dtype  = DOC_TYPE_MAP[docId]
@@ -125,7 +133,7 @@ async function buildPDF(docId: number): Promise<Uint8Array> {
   const court  = 'SUPERIOR COURT OF CALIFORNIA, COUNTY OF SAN FRANCISCO'
   const filer  = 'Donald Ernest Gillson, In Pro Per Defendant'
   const inquiry = 'SFefiling@sftc.org'
-  const now    = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })
+  const now    = CANONICAL_DATE_LABEL
 
   const pdfDoc  = await PDFDocument.create()
   const regular = await pdfDoc.embedFont(StandardFonts.Helvetica)
@@ -139,6 +147,9 @@ async function buildPDF(docId: number): Promise<Uint8Array> {
   pdfDoc.setKeywords([`FSX:${fsx}`, caseNo, dtype, 'RapidLegal', 'SFSC'])
   pdfDoc.setCreator('VALORAIPLUS PDF ENGINE v4.0')
   pdfDoc.setProducer(`FSX Transaction ${fsx}`)
+  // Pin timestamps so output bytes are deterministic and the SHA-256 is stable.
+  pdfDoc.setCreationDate(CANONICAL_FILING_DATE)
+  pdfDoc.setModificationDate(CANONICAL_FILING_DATE)
 
   const W = PageSizes.Letter[0]  // 612
   const H = PageSizes.Letter[1]  // 792
