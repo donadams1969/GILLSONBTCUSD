@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { Download, FileText, CheckCircle, Loader2, Printer, ShieldCheck } from 'lucide-react'
+import { Download, FileText, CheckCircle, Loader2, Printer, ShieldCheck, FileBarChart } from 'lucide-react'
 
 interface DocMeta {
   id: number
@@ -196,6 +196,23 @@ export function PDFDownloadPanel() {
           </p>
         </div>
         <div className="flex items-center gap-2">
+          <button
+            onClick={async () => {
+              const res = await fetch('/api/court/report-pdf')
+              if (!res.ok) return
+              const blob = await res.blob()
+              const url  = URL.createObjectURL(blob)
+              const a    = document.createElement('a')
+              a.href     = url
+              a.download = 'CUD-26-682107_Systems_Development_Report.pdf'
+              a.click()
+              URL.revokeObjectURL(url)
+            }}
+            className="flex items-center gap-2 px-5 py-2.5 rounded-lg bg-sky-500 hover:bg-sky-400 text-black font-mono font-bold text-sm transition"
+          >
+            <FileBarChart className="h-4 w-4" />
+            Systems Report (PDF)
+          </button>
           <button
             onClick={handleProvenance}
             disabled={provBusy}
