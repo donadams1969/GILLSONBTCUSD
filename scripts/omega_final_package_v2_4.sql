@@ -1,0 +1,75 @@
+-- VALORAIPLUS® Σ* — OMEGA FINAL PACKAGE v2.4
+
+-- SECTION 1: SCHEMA DEFINITION
+CREATE TABLE IF NOT EXISTS artifacts (
+    artifact_id TEXT PRIMARY KEY,
+    artifact_type TEXT,
+    sealed_date TIMESTAMPTZ,
+    sha256_full TEXT CHECK (sha256_full ~ '^[0-9a-f]{64}$'),
+    status TEXT
+);
+
+CREATE TABLE IF NOT EXISTS anchors (
+    anchor_id TEXT PRIMARY KEY,
+    anchor_value TEXT,
+    sha256_full TEXT CHECK (sha256_full ~ '^[0-9a-f]{64}$'),
+    note TEXT
+);
+
+-- SECTION 2: DATA UPSERTS
+INSERT INTO artifacts (artifact_id, artifact_type, sealed_date, sha256_full, status) VALUES
+('ART_001', 'SYSTEM_COMPONENT', '2026-01-19T00:00:00Z', 'cb400e65cfc902747376563f9fd2d38d6ed9629259521e76d5de9e1e7b514852', 'SEALED'),
+('ART_002', 'SYSTEM_COMPONENT', '2026-01-19T00:00:00Z', 'd517623abf6aea4915efa341cba51b6f7fa898c5ab8948956b1b2e04bed55c0e', 'SEALED'),
+('ART_003', 'SYSTEM_COMPONENT', '2026-01-19T00:00:00Z', 'a66c94650e6e371fb58e88b7da2d2814bb90b3bf7a317d9dfa988aa35ea37e36', 'SEALED'),
+('ART_004', 'SYSTEM_COMPONENT', '2026-01-19T00:00:00Z', '14e73e43f8b62cddb72cd41a19054274bd9b11856b160287f3549ad92849a171', 'SEALED'),
+('ART_005', 'SYSTEM_COMPONENT', '2026-01-19T00:00:00Z', 'fbd3c2b72e1867274b86d9cd8492a8ab787b272ff07250d243880519a5ba2626', 'SEALED'),
+('ART_006', 'SYSTEM_COMPONENT', '2026-01-19T00:00:00Z', '192117d601be4f032265aaccc40dd490e55684bf60a3cfdaa9adee6710f17ba7', 'SEALED'),
+('ART_007', 'SYSTEM_COMPONENT', '2026-01-19T00:00:00Z', '465017bb34951ee2213fc0ba458650174b5d9940d9511b1fc61822bbc19f696c', 'SEALED'),
+('ART_008', 'SYSTEM_COMPONENT', '2026-01-19T00:00:00Z', 'a129c822d7a408433d6e157cdf53246630620f7dfaa93d9c47898fab71d438db', 'SEALED'),
+('ART_009', 'SYSTEM_COMPONENT', '2026-01-19T00:00:00Z', 'bb47afabdda419e9746b44b6cb62a82aa96d99b412e4d452eb984bf75dc20cba', 'SEALED'),
+('ART_010', 'SYSTEM_COMPONENT', '2026-01-19T00:00:00Z', 'a1bc343eb52d9a051609e165cba0a3e6d1d859f22600477e92f2a00eea00cc29', 'SEALED'),
+('ART_011', 'SYSTEM_COMPONENT', '2026-01-19T00:00:00Z', 'b44654e0daa09c8a829f7f3240ad6db7b7cb238ed6e28f57ebb62f172af662e9', 'SEALED'),
+('ART_012', 'SYSTEM_COMPONENT', '2026-01-19T00:00:00Z', '0b528a618cffe6a8684e7f87f876701a89277e06d4026ef6a5a624bf950c50ec', 'SEALED'),
+('ART_013', 'SYSTEM_COMPONENT', '2026-01-19T00:00:00Z', '00052e2fc59350465b4e5533baf09f8f96c4a5f81aa98da13e681202e84d841c', 'SEALED'),
+('ART_014', 'SYSTEM_COMPONENT', '2026-01-19T00:00:00Z', 'a41d12d962cbf182671f3893948cb25b30aee49aafe4c7eb2e3117979fe0a3c8', 'SEALED'),
+('ART_015', 'SYSTEM_COMPONENT', '2026-01-19T00:00:00Z', '64b84e96342faade29037185de8d059f266da0229dd23805c166c135c311de9f', 'SEALED')
+ON CONFLICT (artifact_id) DO UPDATE SET
+    sha256_full = EXCLUDED.sha256_full,
+    status = EXCLUDED.status;
+
+INSERT INTO anchors (anchor_id, anchor_value, sha256_full, note) VALUES
+('ENS_IDENTITY', 'donny.valorai.eth', '270144b93ee5a9611983dc8a258a366888f00f8576b15f242f99784bbfbd8a7f', 'Primary ENS'),
+('AUTH_ROOT_ANCHOR', '0x7d5a0937e218205632a8f9f687a7f6c7784f676c5f7d5a0937e218205632a8f9', '7d5a0937e218205632a8f9f687a7f6c7784f676c5f7d5a0937e218205632a8f9', 'Auth root'),
+('GENESIS_BLOCK', 'genesis_000', 'd41a8862f372940028e2fede7a0f3b1076c9c52a910a3cc7ef6071c1fba30461', 'Genesis block')
+ON CONFLICT (anchor_id) DO UPDATE SET
+    anchor_value = EXCLUDED.anchor_value,
+    sha256_full = EXCLUDED.sha256_full,
+    note = EXCLUDED.note;
+
+-- SECTION 3: valorai_integrity_check VIEW
+CREATE OR REPLACE VIEW valorai_integrity_check AS
+SELECT
+    'ARTIFACT' AS record_type,
+    artifact_id AS record_id,
+    sha256_full,
+    CASE WHEN sha256_full ~ '^[0-9a-f]{64}$' THEN 'VALID' ELSE 'INVALID' END AS hash_status
+FROM artifacts
+UNION ALL
+SELECT
+    'ANCHOR' AS record_type,
+    anchor_id AS record_id,
+    sha256_full,
+    CASE WHEN sha256_full ~ '^[0-9a-f]{64}$' THEN 'VALID' ELSE 'INVALID' END AS hash_status
+FROM anchors;
+
+-- SECTION 4: SUMMARY QUERY
+/*
+SELECT
+    artifact_type,
+    COUNT(*) as total_artifacts,
+    MIN(sealed_date) as earliest_seal,
+    MAX(sealed_date) as latest_seal
+FROM artifacts
+GROUP BY artifact_type
+ORDER BY total_artifacts DESC;
+*/
